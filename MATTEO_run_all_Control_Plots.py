@@ -39,6 +39,8 @@ currentDir = os.getcwd();
 ###########################################################################################
 
 number_Events_type=11;
+
+
 masses_BulkGraviton=[600,800,1000];
 masses_Higgs=[650,1000];
        
@@ -46,6 +48,11 @@ BulkGraviton_xsec=[0.177400,0.0331548,0.008993];
 VBF_BulkGraviton_xsec=[0.01089,0.00217,0.000655];
 Higgs_xsec=[0.33639,0.06765];
 VBF_Higgs_xsec=[0.03354,0.02375];
+
+xsec_BulkGraviton=[0.177400,0.0331548,0.008993];
+xsec_VBF_BulkGraviton=[0.01089,0.00217,0.000655];
+xsec_Higgs=[0.33639,0.06765];
+xsec_VBF_Higgs=[0.03354,0.02375];
 		    
 NumEntriesBefore_BulkGraviton=[49600,50000,50000];
 NumEntriesBefore_VBF_BulkGraviton=[50000,50000,50000];
@@ -54,6 +61,22 @@ NumEntriesBefore_VBF_Higgs=[398400,400000];
 		    
 ScaleFactor_BulkGraviton=[900,2000,6000];
 ScaleFactor_Higgs=[25,120]
+
+sampleValue =[[BulkGraviton,"BG_600",600,xsec_BulkGraviton[0],NumEntriesBefore_BulkGraviton[0],ScaleFactor_BulkGraviton[0]],
+              [BulkGraviton,"BG_800",800,xsec_BulkGraviton[1],NumEntriesBefore_BulkGraviton[1],ScaleFactor_BulkGraviton[1]],
+              [BulkGraviton,"BG_1000",1000,xsec_BulkGraviton[2],NumEntriesBefore_BulkGraviton[2],ScaleFactor_BulkGraviton[2]],
+              [Higgs,"H_650",650,xsec_Higgs[0],NumEntriesBefore_Higgs[0],ScaleFactor_Higgs[0]],
+              [Higgs,"H_1000",1000,xsec_Higgs[1],NumEntriesBefore_Higgs[1],ScaleFactor_Higgs[1]]];
+              
+              
+sampleValue_VBF =[[BulkGraviton,"VBF_BG_600",600,xsec_VBF_BulkGraviton[0],NumEntriesBefore_VBF_BulkGraviton[0],ScaleFactor_BulkGraviton[0]],
+                  [BulkGraviton,"VBF_BG_800",800,xsec_VBF_BulkGraviton[1],NumEntriesBefore_VBF_BulkGraviton[1],ScaleFactor_BulkGraviton[1]],
+                  [BulkGraviton,"VBF_BG_1000",1000,xsec_VBF_BulkGraviton[2],NumEntriesBefore_VBF_BulkGraviton[2],ScaleFactor_BulkGraviton[2]],
+                  [Higgs,"VBF_H_650",650,xsec_VBF_Higgs[0],NumEntriesBefore_VBF_Higgs[0],ScaleFactor_Higgs[0]],
+                  [Higgs,"VBF_H_1000",1000,xsec_VBF_Higgs[1],NumEntriesBefore_VBF_Higgs[1],ScaleFactor_Higgs[1]]];
+
+
+total_sample_value=[sampleValue,sampleValue_VBF];
 
 
 #cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_mass_pr > 65 && jet_mass_pr < 105","jet_tau2tau1 < 0.45"];
@@ -66,7 +89,7 @@ cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && abs(vbf_maxpt_j1_eta-vbf_maxp
 ###########################################################################################
 
 def make_Input_file(ntuple,channel,lumi,cuts_file,SampleList_filename,table,k,ScaleFactor_table,cut_number,cuttype):
-    
+    '''
     sample=table[0][k][0];
     mass=table[0][k][1];        
     mass_str=str("%.0f"%mass)
@@ -74,7 +97,14 @@ def make_Input_file(ntuple,channel,lumi,cuts_file,SampleList_filename,table,k,Sc
     reducedVBFName=table[1][k][3];
     
     ScaleFactor=ScaleFactor_table[cuttype-1][k][cut_number-1];
+    '''
+    sample=;
+    mass=table[0][k][1];        
+    mass_str=str("%.0f"%mass)
+    reducedggName=table[0][k][3];
+    reducedVBFName=table[1][k][3];
     
+    ScaleFactor=ScaleFactor_table[cuttype-1][k][cut_number-1];    
     
     if channel=="mu":
        leptonT="muon";
