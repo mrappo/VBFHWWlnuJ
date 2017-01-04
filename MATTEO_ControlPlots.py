@@ -30,6 +30,7 @@ parser.add_option('--channel', action="store", type="string", dest="channel", de
 #parser.add_option('--sample', action="store", type="string", dest="sample", default="BulkGraviton")
 parser.add_option('--ntuple', action="store", type="string", dest="ntuple", default="WWTree_22sep_jecV7_lowmass")
 parser.add_option('--lumi', action="store", type="float", dest="lumi", default="2300")
+parser.add_option('--scalew', action="store", type="float", dest="scalew", default="3.0")
 parser.add_option('--nodata', action='store_true', dest='nodata', default=False)
 (options, args) = parser.parse_args()
 currentDir = os.getcwd();
@@ -52,7 +53,7 @@ Events_type_global=["Wjets_Pythia_Events_g",      # 0
 
 number_Events_type=11;
 
-
+Scale_W_Factor_global=options.scalew;
 
        
 BulkGraviton_xsec=[0.177400,0.0331548,0.008993];
@@ -91,8 +92,8 @@ total_sample_value=[sampleValue,sampleValue_VBF];
 
 lumi=options.lumi;
 lumi_str=str("%.0f"%lumi);
-cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105","jet_tau2tau1 < 0.45"];
-#cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 "];
+#cuts_itemize=["AK8Jets_PtCorr > 200","issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45"];
+cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
 #cuts_itemize=["issignal==1 && v_pt>200","pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","jet_tau2tau1 < 0.45"];
 
 
@@ -127,13 +128,13 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
             
     Log_Dir_ll=Directory_Path_ll+"/log";
     if not os.path.isdir(Log_Dir_ll):
-           pd1 = subprocess.Popen(['mkdir',Log_Dir_ll]);
-           pd1.wait();
+           pdl1 = subprocess.Popen(['mkdir',Log_Dir_ll]);
+           pdl1.wait();
             
     Data_Dir_ll=Directory_Path_ll+"/data";
     if not os.path.isdir(Data_Dir_ll):
-           pd2 = subprocess.Popen(['mkdir',Data_Dir_ll]);
-           pd2.wait();
+           pdl2 = subprocess.Popen(['mkdir',Data_Dir_ll]);
+           pdl2.wait();
     
     cn_print=Cut_Number_ll+1; 
     if Cut_Type_ll:
@@ -166,10 +167,11 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     sys.stdout.write("\n\n")
     
     #Summary_Output_File_ll.write("\n\n--------------------------------\n\n")
+    Summary_Output_File_ll.write("\n-------------------------------------------------------------------------------------------------------\n\n")
     Summary_Output_File_ll.write("STARTING\t\t")
     Summary_Output_File_ll.write(process_name)
     Summary_Output_File_ll.write(print_string)
-    Summary_Output_File_ll.write("\n\n--------------------------------\n\n")                
+    #Summary_Output_File_ll.write("\n\n--------------------------------\n\n")                
     
     Wjets_Pythia_Events_d="Jets Pythia  Events:           ";
     Wjets_Herwig_Events_d="Jets Herwig  Events:           ";
@@ -189,11 +191,11 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     Events_type=[Wjets_Pythia_Events_d,Wjets_Herwig_Events_d,TTbar_Powegh_Events_d,TTbar_MC_Events_d,VV_QCD_Events_d,WW_EWK_Events_d,STop_Events_d,All_bkg_Pythia_d,All_bkg_Herwig_d,Signal_gg_d,Signal_VBF_d];
     
     
-    
-    p1 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',Input_Cfg_File_ll[0]],stdout=subprocess.PIPE,stderr=output_log2)
-    p1.wait()
+    Scale_ww_ll=str("%1.1f"%Scale_W_Factor_global);
+    pdl3 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',Input_Cfg_File_ll[0],Scale_ww_ll],stdout=subprocess.PIPE,stderr=output_log2)
+    #pdl3.wait()
     start=0;
-    for line in p1.stdout:
+    for line in pdl3.stdout:
         #sys.stdout.write(line)
         output_log1.write(line)
         if line.find('Event Scaled To Lumi') !=-1:
@@ -206,13 +208,14 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
                cut_string = line.split(ev);
                new_string = cut_string[1]
                print line
+               #Summary_Output_File_ll.write("\n"+line);
                val=float(new_string);
                Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][counter_events_type]=val;
                #print "Cut_Type_ll: %.0f\t Cut_Number_ll:%.0f\t Sample_Number_ll:%.0f\t Line:%.0f\t VALUE:%f"%(Cut_Type_ll,cnumber,k,cn+2,val)
                Latex_File_ll.write("%f\n"%val);
                
             counter_events_type=counter_events_type+1;
-    p1.wait();    
+    pdl3.wait();    
 
     sig_Pytia=Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-1]/(1+TMath.Sqrt(Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-4]));
     sig_Herwig=Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-1]/(1+TMath.Sqrt(Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-3]));
@@ -227,8 +230,15 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     #print "\n\n--------------------------------------------------\n\n"
     Latex_File_ll.write("%f\n"%sig_Pytia);
     Latex_File_ll.write("%f\n"%sig_Herwig);
-    Summary_Output_File_ll.write("Significance Pythia:    %f\n"%sig_Pytia);
-    Summary_Output_File_ll.write("Significance Herwig:    %f\n"%sig_Herwig);
+    Summary_Output_File_ll.write("\n\n------------Calculate Significance----------------\n");
+    Summary_Output_File_ll.write("\nqq signal: %f\n"% Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-1]);
+    Summary_Output_File_ll.write("\nPythia Bkg: %f\n"% Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-4]);
+    Summary_Output_File_ll.write("\nHewig Bkg: %f\n"% Significance_Table_ll[Cut_Type_ll][Cut_Number_ll][Sample_Number_ll][number_Events_type-3]);
+    Summary_Output_File_ll.write("\nSig Pythia: %f\n"% sig_Pytia);
+    Summary_Output_File_ll.write("\nSig Herwig: %f\n\n"% sig_Herwig);
+    Summary_Output_File_ll.write("\n\n--------------------------------------------------\n\n");
+    #Summary_Output_File_ll.write("Significance Pythia:    %f\n"%sig_Pytia);
+    #Summary_Output_File_ll.write("Significance Herwig:    %f\n"%sig_Herwig);
     
     
     Latex_File_ll.write("\n\n");
@@ -237,62 +247,79 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     print "\nInputFile: %s"%Input_Cfg_File_ll[0]   
     print "\nOutputDirectory: %s"%Input_Cfg_File_ll[1]
     
+    Summary_Output_File_ll.write("\n\nInputFile: %s"%Input_Cfg_File_ll[0]);
+    Summary_Output_File_ll.write("\n\nOutputDirectory: %s"%Input_Cfg_File_ll[1]);
+    
     
     print "\nVBF_Sample: %s \tReducedName: %s \tMass: %.0f \txSec: %f \tNumbEntBefore: %.0f \tScaleFactor: %.0f\n"%(total_sample_value[1][Sample_Number_ll][0],total_sample_value[1][Sample_Number_ll][1],total_sample_value[1][Sample_Number_ll][2],total_sample_value[1][Sample_Number_ll][3],total_sample_value[1][Sample_Number_ll][4],total_sample_value[1][Sample_Number_ll][5])
     
     print "\nNormal_Sample: %s \tReducedName: %s \tMass: %.0f \txSec: %f \tNumbEntBefore: %.0f \tScaleFactor: %.0f\n"%(total_sample_value[0][Sample_Number_ll][0],total_sample_value[0][Sample_Number_ll][1],total_sample_value[0][Sample_Number_ll][2],total_sample_value[0][Sample_Number_ll][3],total_sample_value[0][Sample_Number_ll][4],total_sample_value[0][Sample_Number_ll][5])
     
+    Summary_Output_File_ll.write("\n\nVBF_Sample: %s \tReducedName: %s \tMass: %.0f \txSec: %f \tNumbEntBefore: %.0f \tScaleFactor: %.0f\n"%(total_sample_value[1][Sample_Number_ll][0],total_sample_value[1][Sample_Number_ll][1],total_sample_value[1][Sample_Number_ll][2],total_sample_value[1][Sample_Number_ll][3],total_sample_value[1][Sample_Number_ll][4],total_sample_value[1][Sample_Number_ll][5]));
+    
+    Summary_Output_File_ll.write("\nNormal_Sample: %s \tReducedName: %s \tMass: %.0f \txSec: %f \tNumbEntBefore: %.0f \tScaleFactor: %.0f\n"%(total_sample_value[0][Sample_Number_ll][0],total_sample_value[0][Sample_Number_ll][1],total_sample_value[0][Sample_Number_ll][2],total_sample_value[0][Sample_Number_ll][3],total_sample_value[0][Sample_Number_ll][4],total_sample_value[0][Sample_Number_ll][5]));
+    
     path_dir_in_tmp=Input_Cfg_File_ll[1];
     path_dir_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_mu_plot"; 
     #path_dir_in="output/run2/MCDATAComparisonPlot_mu_22sep_%s/Run2_MCDataComparisonRSGraviton2000_mu_plot"%process_name;
     path_dir_out=Directory_Path_ll;
-    p2 = subprocess.Popen(['cp','-r',path_dir_in,path_dir_out])
-    p2.wait()
+    pdl4 = subprocess.Popen(['cp','-r',path_dir_in,path_dir_out])
+    pdl4.wait()
 
+    print "\n\nCopy DATA from: %s"%path_dir_in
+    print "\nCopy DATA to: %s"%path_dir_out
+    
+    Summary_Output_File_ll.write("\n\nCopy DATA from: %s"%path_dir_in);
+    Summary_Output_File_ll.write("\nCopy DATA to: %s"%path_dir_out);
 
-
-    data_in=Directory_Path_ll+"/Run2_MCDataComparisonRSGraviton2000_mu_plot";
-    data_out=Directory_Path_ll+"/data";
-    p3 = subprocess.Popen(['mv',data_in,data_out])
-    p3.wait()
+    data_in=Directory_Path_ll+"/Run2_MCDataComparisonRSGraviton2000_mu_plot/";
+    data_out=Directory_Path_ll+"/data/";
+    pdl5 = subprocess.Popen(['mv',data_in,data_out])
+    pdl5.wait()
+    print "\n\nMove DATA from: %s"%data_in
+    print "\nMove DATA to: %s\n\n"%data_out
+    
+    
+    Summary_Output_File_ll.write("\nMove DATA from: %s"%data_in);
+    Summary_Output_File_ll.write("\nMove DATA to: %s\n\n"%data_out);
 
     root_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_mu.root"
     root_out=data_out+"/Root_ControlPlots_out_%s.root"%process_name;
-    p4 = subprocess.Popen(['cp',root_in,root_out])
-    p4.wait()
+    pdl6 = subprocess.Popen(['cp',root_in,root_out])
+    pdl6.wait()
 
     if os.path.isdir(data_in):
-       p5=subprocess.Popen(['rm','-r',data_in])
-       p5.wait()
+       pdl7=subprocess.Popen(['rm','-r',data_in])
+       pdl7.wait()
                      
     
             
-    output_log1.write("\n\n--------------------------------\n\n")
-    output_log1.write("ENDED\t\t")
-    output_log1.write(process_name)
-    output_log1.write(print_string)
-    output_log1.write("\n\n--------------------------------\n\n")
-    output_log1.close()
+    output_log1.write("\n\n--------------------------------\n\n");
+    output_log1.write("ENDED\t\t");
+    output_log1.write(process_name);
+    output_log1.write(print_string);
+    output_log1.write("\n\n--------------------------------\n\n");
+    output_log1.close();
             
-    output_log2.write("\n\n--------------------------------\n\n")
+    output_log2.write("\n\n--------------------------------\n\n");
     output_log2.write("ENDED\t\t")
-    output_log2.write(process_name)
-    output_log2.write(print_string)
-    output_log2.write("\n\n--------------------------------\n\n")
-    output_log2.close()
+    output_log2.write(process_name);
+    output_log2.write(print_string);
+    output_log2.write("\n\n--------------------------------\n\n");
+    output_log2.close();
             
                         
     #sys.stdout.write("\n\n------------------------------------------------------------------\n\n")
-    sys.stdout.write("ENDED\t\t")
+    sys.stdout.write("\nENDED\t\t")
     sys.stdout.write(process_name)
     sys.stdout.write(print_string)
     sys.stdout.write("\n\n-------------------------------------------------------------------------------------------------------\n\n\n\n")
     
-    Summary_Output_File_ll.write("\n\n--------------------------------\n\n")
-    Summary_Output_File_ll.write("ENDED\t\t")
-    Summary_Output_File_ll.write(process_name)
-    Summary_Output_File_ll.write(print_string)
-    Summary_Output_File_ll.write("\n\n--------------------------------\n\n")
+    #Summary_Output_File_ll.write("\n\n--------------------------------\n\n")
+    Summary_Output_File_ll.write("\nENDED\t\t");
+    Summary_Output_File_ll.write(process_name);
+    Summary_Output_File_ll.write(print_string);
+    Summary_Output_File_ll.write("\n\n-------------------------------------------------------------------------------------------------------\n\n\n\n");
     
     
     return Significance_Table_ll;
@@ -320,10 +347,10 @@ def make_latex_table(Cuts_Total_Number_tk,Sig_Data_Table_tk,ctype_tk,Sample_Numb
     
     if Cut_Type_tk:
            Output_File_tk.write("\\frametitle{%s %s - Control Plots - Single Cut }\n"%(Sample_tk,Mass_Str_tk));   
-           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" }\n");
+           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
     else:
            Output_File_tk.write("\\frametitle{%s %s - Control Plots - Consecutive Cuts }\n"%(Sample_tk,Mass_Str_tk));   
-           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" }\n");
+           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
     
     
     latex_table=[[0 for i in range(number_Events_type+5)] for j in range(Cuts_Total_Number_tk+1)];
@@ -523,6 +550,7 @@ if __name__ == '__main__':
     Lumi_mm=options.lumi;
     Lumi_mm_str=str("%.0f"%Lumi_mm);
     Lumi_mm_str_all=str("%f"%Lumi_mm);
+    
     print "\n\n\nWelcome! \nControl Plots Maker!\n"
     print "\nNtuple:\t%s\n"%options.ntuple
     print "Luminosity:\t%f"%Lumi_mm
@@ -575,19 +603,35 @@ if __name__ == '__main__':
            pd3 = subprocess.Popen(['mkdir',Cuts_File_Dir_mm]);
            pd3.wait();
        
-       
-    Control_Plots_Dir_mm=Lumi_Dir_mm+"/ControlPlots";
-    if os.path.isdir(Control_Plots_Dir_mm):
-       pd10 = subprocess.Popen(['rm','-r',Control_Plots_Dir_mm]);
-       pd10.wait();   
-       
+  
     
-    pd4 = subprocess.Popen(['mkdir',Control_Plots_Dir_mm]);
-    pd4.wait();
+       
+    ControlP_Dir=Lumi_Dir_mm+"/ControlPlots";
+    if not os.path.isdir(ControlP_Dir):
+           pd4 = subprocess.Popen(['mkdir',ControlP_Dir]);
+           pd4.wait();   
+    
+    
+    
+    Scale_W_Factor_Dir_mm=ControlP_Dir+"/ScaleW%1.1f"%Scale_W_Factor_global;
+    
+
+    if os.path.isdir(Scale_W_Factor_Dir_mm):
+       pd5 = subprocess.Popen(['rm','-r',Scale_W_Factor_Dir_mm]);
+       pd5.wait();
+    
+    pd6 = subprocess.Popen(['mkdir',Scale_W_Factor_Dir_mm]);
+    pd6.wait();
+    
+    Control_Plots_Dir_mm=Scale_W_Factor_Dir_mm;
+    
+    
+    #if not os.path.isdir(Scale_W_Factor_Dir_mm):
+    #
     
     cfg_file_removal=Cuts_File_Dir_mm+"/MATTEO_*";
-    pd5b = subprocess.Popen(['rm','-r',cfg_file_removal]);
-    pd5b.wait();
+    pd7 = subprocess.Popen(['rm','-r',cfg_file_removal]);
+    pd7.wait();
     
     
     #########################################################
@@ -677,11 +721,11 @@ if __name__ == '__main__':
         
         
         Output_Summary_File_mm.write("\n\n\n\n------------------Making CutsFile---------------------\n");
-        Output_Summary_File_mm.write("Total number of cuts:\t%.0f"% Cuts_Total_Number_mm);
-        Output_Summary_File_mm.write("Current cut:\t%.0f"%(Plus_Cut_Counter));
-        Output_Summary_File_mm.write("\nCut file 1:\t%s"%cuts_file1);
-        Output_Summary_File_mm.write("Cut String 1:\t%s"%cut_string1);
-        Output_Summary_File_mm.write("\nCut file 2:\t%s"%cuts_file2);
+        Output_Summary_File_mm.write("Total number of cuts:\t%.0f\n"% Cuts_Total_Number_mm);
+        Output_Summary_File_mm.write("Current cut:\t%.0f\n"%(Plus_Cut_Counter));
+        Output_Summary_File_mm.write("\nCut file 1:\t%s\n"%cuts_file1);
+        Output_Summary_File_mm.write("Cut String 1:\t%s\n\n"%cut_string1);
+        Output_Summary_File_mm.write("\nCut file 2:\t%s\n"%cuts_file2);
         Output_Summary_File_mm.write("Cut String 2:\t%s"%cut_string2);
         Output_Summary_File_mm.write("\n------------------------------------------------------");
         
@@ -810,14 +854,14 @@ if __name__ == '__main__':
         Output_SampleFile_mm.write("WWTree_WJets100					W+Jets          2			1347			10205377\n");
         Output_SampleFile_mm.write("WWTree_WJets200					W+Jets          2			360.			4949568\n");
         Output_SampleFile_mm.write("WWTree_WJets400					W+Jets          2			48.9			1943664\n");
-        Output_SampleFile_mm.write("#WWTree_WJets600					W+Jets          2			18.77			1041358\n");
+        Output_SampleFile_mm.write("#WWTree_WJets600				W+Jets          2			18.77			1041358\n");
         Output_SampleFile_mm.write("WWTree_WJets600bis				W+Jets          2			12.8			3767766\n");
         Output_SampleFile_mm.write("WWTree_WJets800					W+Jets          2			5.26			1568277\n");    
         Output_SampleFile_mm.write("WWTree_WJets1200				W+Jets          2			1.33			246239\n");    
         Output_SampleFile_mm.write("WWTree_WJets2500				W+Jets          2			0.03089			251982\n");    
-        Output_SampleFile_mm.write("WWTree_WW						WW              4			118.7			988418\n");
-        Output_SampleFile_mm.write("WWTree_WZ						WZ              4			47.13			1000000\n");
-        Output_SampleFile_mm.write("WWTree_ZZ						ZZ              4			16.523			985600\n");
+        Output_SampleFile_mm.write("#WWTree_WW						WW              4			118.7			988418\n");
+        Output_SampleFile_mm.write("#WWTree_WZ						WZ              4			47.13			1000000\n");
+        Output_SampleFile_mm.write("#WWTree_ZZ						ZZ              4			16.523			985600\n");
         Output_SampleFile_mm.write("WWTree_WW_excl					WW              4			49.997			1924400\n");
         Output_SampleFile_mm.write("WWTree_WZ_excl					WZ              4			10.71			25704656\n");
         Output_SampleFile_mm.write("WWTree_ZZ_excl					ZZ              4			3.22			15301695\n");
@@ -957,13 +1001,13 @@ if __name__ == '__main__':
         Plus_Cut_Counter_str=str("%.0f"%(Plus_Cut_Counter));
         control_cuts1_dir=Control_Plots_Dir_mm+"/Consecutive_Cuts_%s"%(str(Plus_Cut_Counter));
         if not os.path.isdir(control_cuts1_dir):
-               pd5 = subprocess.Popen(['mkdir',control_cuts1_dir]);
-               pd5.wait();
+               pd8 = subprocess.Popen(['mkdir',control_cuts1_dir]);
+               pd8.wait();
     
         control_cuts2_dir=Control_Plots_Dir_mm+"/Single_Cuts_%s"%(str(Plus_Cut_Counter));
         if not os.path.isdir(control_cuts2_dir):
-               pd6 = subprocess.Popen(['mkdir',control_cuts2_dir]);
-               pd6.wait();
+               pd9 = subprocess.Popen(['mkdir',control_cuts2_dir]);
+               pd9.wait();
            
         cuts_file1=Cuts_filename_table[0][Cut_Number_mm];
         cuts_file2=Cuts_filename_table[1][Cut_Number_mm];
@@ -977,7 +1021,7 @@ if __name__ == '__main__':
         
         Output_Summary_File_mm.write("\n\n\n----------------------Making Control Plots-----------------------\n");
         Output_Summary_File_mm.write("\nProcessing Cuts %0.f of %0.f\n"%(Plus_Cut_Counter,Cuts_Total_Number_mm));
-        Output_Summary_File_mm.write("Using Cuts File 1:\t%s"%cuts_file1);
+        Output_Summary_File_mm.write("\nUsing Cuts File 1:\t%s\n"%cuts_file1);
         Output_Summary_File_mm.write("Using Cuts File 2:\t%s"%cuts_file2);
         Output_Summary_File_mm.write("\n-----------------------------------------------------------------\n\n\n");
         
@@ -1007,22 +1051,25 @@ if __name__ == '__main__':
             
             final_dir1=control_cuts1_dir+"/"+sample+mass_str;
             if not os.path.isdir(final_dir1):
-               pd7 = subprocess.Popen(['mkdir',final_dir1]);
-               pd7.wait();
+               pd10 = subprocess.Popen(['mkdir',final_dir1]);
+               pd10.wait();
                  
             final_dir2=control_cuts2_dir+"/"+sample+mass_str;
             if not os.path.isdir(final_dir2):
-               pd8 = subprocess.Popen(['mkdir',final_dir2]);
-               pd8.wait();
+               pd11 = subprocess.Popen(['mkdir',final_dir2]);
+               pd11.wait();
             
             print "\nFinalDir1: %s"%final_dir1
             print "\nFinalDir2: %s"%final_dir2
             print "\n-----------------------------------------------------------------------------------------------------------------\n\n\n\n"
             
+            Output_Summary_File_mm.write("\nFinalDir1: %s"%final_dir1);
+            Output_Summary_File_mm.write("\nFinalDir2: %s"%final_dir2);
+            Output_Summary_File_mm.write("\n-----------------------------------------------------------------------------------------------------------------\n\n\n\n");
                             
-            Output_Summary_File_mm.write("\n-----------------------------------------------------------------\n");
+            Output_Summary_File_mm.write("\n-------------------------------------------------------------------------------\n");
             Output_Summary_File_mm.write("CONSECUTIVE CUTS");
-            Output_Summary_File_mm.write("\n-----------------------------------------------------------------\n");    
+            Output_Summary_File_mm.write("\n-------------------------------------------------------------------------------");    
             Output_Summary_Latex_File_mm.write("\nCONSECUTIVE CUT\n");
             cfg_file_1=[Cfg_FileName_Table_mm[0][Cut_Number_mm][n_sample],Cfg_FileName_Table_mm[0][Cut_Number_mm][Sample_Total_Number_mm+n_sample]];
             #def run_log(sampleNumber,cutNumber,ctype,total_cutNumber,Significance_Table_mm_log,input_cfg_file,latex_file,Output_Summary_File_mm,in_cc_dir):
@@ -1032,9 +1079,9 @@ if __name__ == '__main__':
             
             
             
-            Output_Summary_File_mm.write("\n-----------------------------------------------------------------\n");
+            Output_Summary_File_mm.write("\n-----------------------------------------------------------------------------\n");
             Output_Summary_File_mm.write("SINGLE CUT");
-            Output_Summary_File_mm.write("\n-----------------------------------------------------------------\n");  
+            Output_Summary_File_mm.write("\n-----------------------------------------------------------------------------");  
             Output_Summary_Latex_File_mm.write("\nSINGLE CUT\n");
             cfg_file_2=[Cfg_FileName_Table_mm[1][Cut_Number_mm][n_sample],Cfg_FileName_Table_mm[1][Cut_Number_mm][Sample_Total_Number_mm+n_sample]];
             #def run_log(sampleNumber,cutNumber,ctype,total_cutNumber,Significance_Table_mm_log,input_cfg_file,latex_file,Output_Summary_File_mm,in_cc_dir):
@@ -1104,8 +1151,24 @@ if __name__ == '__main__':
     tmp_ntuple_texttt=replace_latex(options.ntuple);
     Ntuple_Name_texttt="\\texttt{"+tmp_ntuple_texttt+"}";
     
-   
-
+    Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
+    Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Settings }\n");   
+    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" }\n");
+    Output_Beamer_Latex_File_mm.write("\changefontsizes{11pt}\n");
+    Output_Beamer_Latex_File_mm.write("\\begin{itemize}\n");
+    Output_Beamer_Latex_File_mm.write("\item Luminosit\`a:%.0f ${fb}^{-1}$\n"%Lumi_mm);
+    Output_Beamer_Latex_File_mm.write("\item Ntuple: %s\n"%Ntuple_Name_texttt);
+    Output_Beamer_Latex_File_mm.write("\item W+Jets Scale Factor: %1.1f\n"%Scale_W_Factor_global);
+    Output_Beamer_Latex_File_mm.write("\end{itemize}\n");
+    Output_Beamer_Latex_File_mm.write("\end{frame}\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\n");
     # Slides with Cuts
     
     ## Consecutive Cuts
@@ -1113,7 +1176,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{frame}[t,allowframebreaks]\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Consecutive Cuts }\n");   
-    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" }\n");
+    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
     Output_Beamer_Latex_File_mm.write("\changefontsizes{7pt}\n");
     #Output_Beamer_Latex_File_mm.write("\\begin{table}[H]\n");
     #Output_Beamer_Latex_File_mm.write("\\begin{center}\n");
@@ -1141,7 +1204,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Single Cut }\n");   
-    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" }\n");
+    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
     Output_Beamer_Latex_File_mm.write("\changefontsizes{7pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{table}[H]\n");
     Output_Beamer_Latex_File_mm.write("\\begin{center}\n");
