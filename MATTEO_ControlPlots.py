@@ -30,7 +30,7 @@ parser.add_option('--channel', action="store", type="string", dest="channel", de
 #parser.add_option('--sample', action="store", type="string", dest="sample", default="BulkGraviton")
 parser.add_option('--ntuple', action="store", type="string", dest="ntuple", default="WWTree_22sep_jecV7_lowmass")
 parser.add_option('--lumi', action="store", type="float", dest="lumi", default="2300")
-parser.add_option('--scalew', action="store", type="float", dest="scalew", default="3.0")
+parser.add_option('--scalew', action="store", type="float", dest="scalew", default="1.4")
 parser.add_option('--nodata', action='store_true', dest='nodata', default=False)
 (options, args) = parser.parse_args()
 currentDir = os.getcwd();
@@ -92,8 +92,11 @@ total_sample_value=[sampleValue,sampleValue_VBF];
 
 lumi=options.lumi;
 lumi_str=str("%.0f"%lumi);
+
+# Luca CutString=
+cuts_itemize=["1==1 && njets>2 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"];
 #cuts_itemize=["AK8Jets_PtCorr > 200","issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45"];
-cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
+#cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
 #cuts_itemize=["issignal==1 && v_pt>200","pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","jet_tau2tau1 < 0.45"];
 
 
@@ -334,7 +337,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
 
 
          
-def make_latex_table(Cuts_Total_Number_tk,Sig_Data_Table_tk,ctype_tk,Sample_Number_tk,Output_File_tk,NtupleTTName_tk):
+def make_latex_table(Cuts_Total_Number_tk,Sig_Data_Table_tk,ctype_tk,Sample_Number_tk,Output_File_tk,NtupleTTName_tk,frameSubTitle_tk):
  
     Cut_Type_tk=ctype_tk-1;
     Sample_tk=sampleValue[Sample_Number_tk][0];
@@ -347,10 +350,10 @@ def make_latex_table(Cuts_Total_Number_tk,Sig_Data_Table_tk,ctype_tk,Sample_Numb
     
     if Cut_Type_tk:
            Output_File_tk.write("\\frametitle{%s %s - Control Plots - Single Cut }\n"%(Sample_tk,Mass_Str_tk));   
-           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
+           Output_File_tk.write(frameSubTitle_tk);
     else:
            Output_File_tk.write("\\frametitle{%s %s - Control Plots - Consecutive Cuts }\n"%(Sample_tk,Mass_Str_tk));   
-           Output_File_tk.write("\\framesubtitle{$\mu$-channel  Ntuple: "+NtupleTTName_tk+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
+           Output_File_tk.write(frameSubTitle_tk);
     
     
     latex_table=[[0 for i in range(number_Events_type+5)] for j in range(Cuts_Total_Number_tk+1)];
@@ -528,7 +531,42 @@ def replace_latex(in_string):
 
 
     
-    
+def latex_graph_include(Sample_gi,Mass_gi,ScaleFactor_gi,ofile_gi,FrameSubTitle_gi):
+
+
+
+
+    SampleMass_gi=Sample_gi+str("%.0f"%Mass_gi);
+    ofile_gi.write("\\begin{frame}[allowframebreaks]\n");
+    ofile_gi.write("\\frametitle{%s %.0f - SignalScaleFactor %.0f - Control Plots }\n"%(Sample_gi,Mass_gi,ScaleFactor_gi));
+    ofile_gi.write(FrameSubTitle_gi);
+
+    ofile_gi.write("\setcounter{subfigure}{0}\n");
+    ofile_gi.write("\\begin{figure}[h]\n");
+    ofile_gi.write("\\begin{center}\n");
+    ofile_gi.write("\subfloat[][\emph{$\Delta\eta_{jj}$}]\n");
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0.pdf}} \quad\n"%(SampleMass_gi));
+    ofile_gi.write("\subfloat[][\emph{$\Delta\eta_{jj}$ Log Scale}]\n");
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0_Log.pdf}}\n"%SampleMass_gi);
+    #ofile_gi.write("\%\caption{$\mu$-channel: Input Variables for Cut Optimization.}\n");
+    ofile_gi.write("\label{}\n");
+    ofile_gi.write("\end{center}\n");
+    ofile_gi.write("\end{figure}\n");
+
+    ofile_gi.write("\\framebreak\n");
+    ofile_gi.write("\setcounter{subfigure}{0}\n");
+    ofile_gi.write("\\begin{figure}[h]\n");
+    ofile_gi.write("\\begin{center}\n");
+    ofile_gi.write("\subfloat[][\emph{$M_{jj}$}]\n");
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/vbf_maxpt_jj_m_0.pdf}} \quad\n"%SampleMass_gi);
+    ofile_gi.write("\subfloat[][\emph{$M_{jj}$ Log Scale}]\n");
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/vbf_maxpt_jj_m_0_Log.pdf}}\n"%SampleMass_gi);
+    #ofile_gi.write("\%\caption{$\mu$-channel: Input Variables for Cut Optimization.}\n"%SampleMass_gi);
+    ofile_gi.write("\label{}\n");
+    ofile_gi.write("\end{center}\n");
+    ofile_gi.write("\end{figure}\n");
+
+    ofile_gi.write("\end{frame}\n");
     
     
    
@@ -846,6 +884,7 @@ if __name__ == '__main__':
     
     
         Output_SampleFile_mm=open(FileName_Sample_mm,'w+');
+        '''
         Output_SampleFile_mm.write("####################################################################################################\n");
         Output_SampleFile_mm.write("###   Sample Name				Reduced Name	Color		XSec (pb)		NumEntriesBefore\n");
         Output_SampleFile_mm.write("####################################################################################################\n");
@@ -883,7 +922,42 @@ if __name__ == '__main__':
         Output_SampleFile_mm.write("####################################################################################\n");
         Output_SampleFile_mm.write("######### SIGNAL VALUES\n");
         Output_SampleFile_mm.write("####################################################################################\n");
+        '''
         
+        
+        Output_SampleFile_mm.write("####################################################################################################\n");
+        Output_SampleFile_mm.write("###   Sample Name				Reduced Name	Color		XSec (pb)		NumEntriesBefore\n");
+        Output_SampleFile_mm.write("####################################################################################################\n");        
+        
+        
+        Output_SampleFile_mm.write("WWTree_data_golden_2p1			DATA			1			1				1\n");
+        Output_SampleFile_mm.write("#WWTree_data_muonPhys			DATA             1                  1               1\n");
+        Output_SampleFile_mm.write("#WWTree_WJets					Jets           2                  61526.7         24184766\n");
+        Output_SampleFile_mm.write("WWTree_WJets100					W+Jets           2                  1347            10152718\n");
+        Output_SampleFile_mm.write("WWTree_WJets200					W+Jets           2                  360.           5221599\n");
+        Output_SampleFile_mm.write("WWTree_WJets400					W+Jets           2                  48.9            1745914\n");
+        Output_SampleFile_mm.write("#WWTree_WJets600				W+Jets           2                  18.77            1039152\n");
+        Output_SampleFile_mm.write("WWTree_WJets600bis				W+Jets           2                  12.8            4041997\n");
+        Output_SampleFile_mm.write("WWTree_WJets800					W+Jets           2                  5.26            1574633\n");
+        Output_SampleFile_mm.write("WWTree_WJets1200				W+Jets           2                  1.33            255637\n");
+        Output_SampleFile_mm.write("WWTree_WJets2500				W+Jets           2                  0.03089         253036\n");
+        Output_SampleFile_mm.write("#WWTree_WW						WW               4                  118.7           993640\n");
+        Output_SampleFile_mm.write("#WWTree_WZ						WZ               4                  47.13            978512\n");
+        Output_SampleFile_mm.write("#WWTree_ZZ						ZZ               4                   16.523            996944\n");
+        Output_SampleFile_mm.write("WWTree_WW_excl					WW               4                  49.997           1951600\n");
+        Output_SampleFile_mm.write("WWTree_WZ_excl					WZ               4                  10.71           14346866\n");
+        Output_SampleFile_mm.write("#WWTree_WZ_excl					WZ               4                  10.71           24714550\n");
+        Output_SampleFile_mm.write("WWTree_ZZ_excl					ZZ               4                 3.22            18790122\n");
+        Output_SampleFile_mm.write("#WWTree_ZZ_excl					ZZ               4                 3.22           11863244\n");
+        Output_SampleFile_mm.write("#WWTree_sch						STop             7                  3.65792         984400\n");
+        Output_SampleFile_mm.write("WWTree_sch						STop             7                  3.65792         613384\n");
+        Output_SampleFile_mm.write("WWTree_tch_bar					STop             7                  26.0659         1680200\n");
+        Output_SampleFile_mm.write("WWTree_tch						STop             7                  43.79844        3299800\n");
+        Output_SampleFile_mm.write("WWTree_tWch						STop             7                  35.6            995600\n");
+        Output_SampleFile_mm.write("WWTree_tWch_bar					STop             7                  35.6             988500\n");
+        Output_SampleFile_mm.write("#WWTree_TTbar_amcatnlo			tt_bar           210                831.76          42784971\n");
+        Output_SampleFile_mm.write("#WWTree_TTbar_madgraph			tt_bar           210                831.76          11344206\n");
+        Output_SampleFile_mm.write("WWTree_TTbar					tt_bar           210                831.76          19757190\n");
         
         
         if Sample_mm=="BulkGraviton":
@@ -954,13 +1028,14 @@ if __name__ == '__main__':
             Output_SampleFile_mm_sample.write(("InputCutList = %s\n")%Cuts_FileName_mm);
             Output_SampleFile_mm_sample.write(("SignalqqHName = %s\n")%ReducedName_VBF_mm);
             Output_SampleFile_mm_sample.write(("SignalggHName = %s\n")%ReducedName_mm);
+            Output_SampleFile_mm_sample.write(("SignalGraviton = grav\n"));
             Output_SampleFile_mm_sample.write(("WithoutData = %s\n\n\n")%withData);    
             Output_SampleFile_mm_sample.write("[Option]\n\n");    
-            Output_SampleFile_mm_sample.write("BackgroundWeight = genWeight\n");
+            Output_SampleFile_mm_sample.write("BackgroundWeight = genWeight*eff_and_pu_Weight\n");
             Output_SampleFile_mm_sample.write("BackgroundWeightMCatNLO = 1\n");
             Output_SampleFile_mm_sample.write("SignalggHWeight = 1\n");
             Output_SampleFile_mm_sample.write("SignalqqHWeight = 1\n");
-            Output_SampleFile_mm_sample.write("SignalGravitonWeight = genWeight\n");
+            #Output_SampleFile_mm_sample.write("SignalGravitonWeight = genWeight\n");
             Output_SampleFile_mm_sample.write(("Lumi = %f\n")%Lumi_mm);
             Output_SampleFile_mm_sample.write("ttbarControlplots = false\n");
             Output_SampleFile_mm_sample.write("SignalScaleFactor = %f\n"%(ScaleFactor_mm));
@@ -1139,7 +1214,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\\newcolumntype{C}[1]{>{\centering\let\\newline\\\\arraybackslash\hspace{0pt}}m{#1}}\n");
     Output_Beamer_Latex_File_mm.write("\n");
     Output_Beamer_Latex_File_mm.write("\n");
-    Output_Beamer_Latex_File_mm.write("\n");
+    Output_Beamer_Latex_File_mm.write("\graphicspath{{/home/matteo/Tesi/LxPlus_Matteo/ControlPlots/5gen/ControlPlots/ScaleW3.0/Consecutive_Cuts_12/}}\n");
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{document}\n");
     Output_Beamer_Latex_File_mm.write("\n");
@@ -1151,9 +1226,11 @@ if __name__ == '__main__':
     tmp_ntuple_texttt=replace_latex(options.ntuple);
     Ntuple_Name_texttt="\\texttt{"+tmp_ntuple_texttt+"}";
     
+    
+    latex_FrameSubtitle="\\framesubtitle{$\mu$-channel \hspace{6pt} Ntuple: "+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %1.1f}\n"%Scale_W_Factor_global;
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Settings }\n");   
-    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" }\n");
+    Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
     Output_Beamer_Latex_File_mm.write("\changefontsizes{11pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\item Luminosit\`a:%.0f ${fb}^{-1}$\n"%Lumi_mm);
@@ -1168,7 +1245,19 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\n");
     Output_Beamer_Latex_File_mm.write("\n");
     Output_Beamer_Latex_File_mm.write("\n");
-    Output_Beamer_Latex_File_mm.write("\n");
+    
+    
+    ### Slides with Plots
+    #def latex_graph_include(Sample_gi,Mass_gi,ScaleFactor_gi,ofile_gi,FrameSubTitle_gi)
+    nsample=0;
+    for nsample in range(Sample_Total_Number_mm):
+    
+        latex_graph_include(sampleValue[nsample][0],sampleValue[nsample][2],sampleValue[nsample][5],Output_Beamer_Latex_File_mm,latex_FrameSubtitle);
+        
+
+
+    
+    
     # Slides with Cuts
     
     ## Consecutive Cuts
@@ -1176,7 +1265,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{frame}[t,allowframebreaks]\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Consecutive Cuts }\n");   
-    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
+    Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
     Output_Beamer_Latex_File_mm.write("\changefontsizes{7pt}\n");
     #Output_Beamer_Latex_File_mm.write("\\begin{table}[H]\n");
     #Output_Beamer_Latex_File_mm.write("\\begin{center}\n");
@@ -1204,7 +1293,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Single Cut }\n");   
-    Output_Beamer_Latex_File_mm.write("\\framesubtitle{$\mu$-channel  Ntuple: "+Ntuple_Name_texttt+" W+Jets Scale Factor: %1.1f}\n"%Scale_W_Factor_global);
+    Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
     Output_Beamer_Latex_File_mm.write("\changefontsizes{7pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{table}[H]\n");
     Output_Beamer_Latex_File_mm.write("\\begin{center}\n");
@@ -1240,10 +1329,10 @@ if __name__ == '__main__':
     for nsample in range(Sample_Total_Number_mm):
         
         # Consecutive Cuts
-        make_latex_table(Cuts_Total_Number_mm,Significance_Table_mm,1,nsample,Output_Beamer_Latex_File_mm,Ntuple_Name_texttt);
+        make_latex_table(Cuts_Total_Number_mm,Significance_Table_mm,1,nsample,Output_Beamer_Latex_File_mm,Ntuple_Name_texttt,latex_FrameSubtitle);
         
         # Single Cut
-        make_latex_table(Cuts_Total_Number_mm,Significance_Table_mm,2,nsample,Output_Beamer_Latex_File_mm,Ntuple_Name_texttt);
+        make_latex_table(Cuts_Total_Number_mm,Significance_Table_mm,2,nsample,Output_Beamer_Latex_File_mm,Ntuple_Name_texttt,latex_FrameSubtitle);
         
     Output_Beamer_Latex_File_mm.write("\end{document}\n");
     Output_Summary_Latex_File_mm.close()
