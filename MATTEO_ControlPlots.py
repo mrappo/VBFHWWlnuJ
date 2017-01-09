@@ -30,7 +30,7 @@ parser.add_option('--channel', action="store", type="string", dest="channel", de
 #parser.add_option('--sample', action="store", type="string", dest="sample", default="BulkGraviton")
 parser.add_option('--ntuple', action="store", type="string", dest="ntuple", default="WWTree_22sep_jecV7_lowmass")
 parser.add_option('--lumi', action="store", type="float", dest="lumi", default="2300")
-parser.add_option('--scalew', action="store", type="float", dest="scalew", default="1.4")
+parser.add_option('--scalew', action="store", type="float", dest="scalew", default="1")
 parser.add_option('--nodata', action='store_true', dest='nodata', default=False)
 (options, args) = parser.parse_args()
 currentDir = os.getcwd();
@@ -54,6 +54,8 @@ Events_type_global=["Wjets_Pythia_Events_g",      # 0
 number_Events_type=11;
 
 Scale_W_Factor_global=options.scalew;
+
+Scale_W_Factor_global_str=str(Scale_W_Factor_global);
 
        
 BulkGraviton_xsec=[0.177400,0.0331548,0.008993];
@@ -93,8 +95,35 @@ total_sample_value=[sampleValue,sampleValue_VBF];
 lumi=options.lumi;
 lumi_str=str("%.0f"%lumi);
 
-# Luca CutString=
-cuts_itemize=["1==1 && njets>2 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"];
+
+
+
+
+####################
+## CUTS STRING
+####################
+
+### Luca CutString=
+#cuts_itemize=["1==1 && njets>2 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"];
+
+
+###### Cut String for B-TAGGING nella regione di segnale VBF
+###per eliminare eventi con jet b-taggati
+#nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89
+
+###regione arricchita ttbar
+#nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89
+
+
+#eliminare eventi con B-TAGGING
+cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 &&  jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"];
+
+
+#TTbar ControlRegion
+#cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 &&  jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45 && nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"];
+
+
+#cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
 #cuts_itemize=["AK8Jets_PtCorr > 200","issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45"];
 #cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
 #cuts_itemize=["issignal==1 && v_pt>200","pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","jet_tau2tau1 < 0.45"];
@@ -194,7 +223,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     Events_type=[Wjets_Pythia_Events_d,Wjets_Herwig_Events_d,TTbar_Powegh_Events_d,TTbar_MC_Events_d,VV_QCD_Events_d,WW_EWK_Events_d,STop_Events_d,All_bkg_Pythia_d,All_bkg_Herwig_d,Signal_gg_d,Signal_VBF_d];
     
     
-    Scale_ww_ll=str("%1.1f"%Scale_W_Factor_global);
+    Scale_ww_ll=Scale_W_Factor_global_str;
     pdl3 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',Input_Cfg_File_ll[0],Scale_ww_ll],stdout=subprocess.PIPE,stderr=output_log2)
     #pdl3.wait()
     start=0;
@@ -651,7 +680,7 @@ if __name__ == '__main__':
     
     
     
-    Scale_W_Factor_Dir_mm=ControlP_Dir+"/ScaleW%1.1f"%Scale_W_Factor_global;
+    Scale_W_Factor_Dir_mm=ControlP_Dir+"/ScaleW%s"%Scale_W_Factor_global_str;
     
 
     if os.path.isdir(Scale_W_Factor_Dir_mm):
@@ -1214,7 +1243,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\\newcolumntype{C}[1]{>{\centering\let\\newline\\\\arraybackslash\hspace{0pt}}m{#1}}\n");
     Output_Beamer_Latex_File_mm.write("\n");
     Output_Beamer_Latex_File_mm.write("\n");
-    Output_Beamer_Latex_File_mm.write("\graphicspath{{/home/matteo/Tesi/LxPlus_Matteo/ControlPlots/5gen/ControlPlots/ScaleW3.0/Consecutive_Cuts_12/}}\n");
+    Output_Beamer_Latex_File_mm.write("\graphicspath{{/home/matteo/Tesi/LxPlus_Matteo/ControlPlots/5gen/ControlPlots/ScaleW%s/Consecutive_Cuts_%.0f/}}\n"%(Scale_W_Factor_global_str,Cuts_Total_Number_mm));
     Output_Beamer_Latex_File_mm.write("\changefontsizes{9pt}\n");
     Output_Beamer_Latex_File_mm.write("\\begin{document}\n");
     Output_Beamer_Latex_File_mm.write("\n");
@@ -1227,7 +1256,7 @@ if __name__ == '__main__':
     Ntuple_Name_texttt="\\texttt{"+tmp_ntuple_texttt+"}";
     
     
-    latex_FrameSubtitle="\\framesubtitle{$\mu$-channel \hspace{6pt} Ntuple: "+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %1.1f}\n"%Scale_W_Factor_global;
+    latex_FrameSubtitle="\\framesubtitle{$\mu$-channel \hspace{6pt} Ntuple: "+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %s}\n"%Scale_W_Factor_global_str;
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Settings }\n");   
     Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
@@ -1235,7 +1264,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\\begin{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\item Luminosit\`a:%.0f ${fb}^{-1}$\n"%Lumi_mm);
     Output_Beamer_Latex_File_mm.write("\item Ntuple: %s\n"%Ntuple_Name_texttt);
-    Output_Beamer_Latex_File_mm.write("\item W+Jets Scale Factor: %1.1f\n"%Scale_W_Factor_global);
+    Output_Beamer_Latex_File_mm.write("\item W+Jets Scale Factor: %s\n"%Scale_W_Factor_global_str);
     Output_Beamer_Latex_File_mm.write("\end{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\end{frame}\n");
     Output_Beamer_Latex_File_mm.write("\n");
