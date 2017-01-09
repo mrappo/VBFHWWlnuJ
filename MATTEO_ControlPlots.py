@@ -26,11 +26,11 @@ from ROOT import gROOT, TPaveLabel, gStyle, gSystem, TGaxis, TStyle, TLatex, TSt
 
 parser = OptionParser()
 
-parser.add_option('--channel', action="store", type="string", dest="channel", default="mu")
+parser.add_option('--channel', action="store", type="string", dest="channel", default="em")
 #parser.add_option('--sample', action="store", type="string", dest="sample", default="BulkGraviton")
 parser.add_option('--ntuple', action="store", type="string", dest="ntuple", default="WWTree_22sep_jecV7_lowmass")
 parser.add_option('--lumi', action="store", type="float", dest="lumi", default="2300")
-parser.add_option('--scalew', action="store", type="float", dest="scalew", default="1")
+parser.add_option('--scalew', action="store", type="float", dest="scalew", default="1.21")
 parser.add_option('--nodata', action='store_true', dest='nodata', default=False)
 (options, args) = parser.parse_args()
 currentDir = os.getcwd();
@@ -94,6 +94,7 @@ total_sample_value=[sampleValue,sampleValue_VBF];
 
 lumi=options.lumi;
 lumi_str=str("%.0f"%lumi);
+Channel_global=options.channel;
 
 
 
@@ -103,9 +104,14 @@ lumi_str=str("%.0f"%lumi);
 ## CUTS STRING
 ####################
 
+
+#sideBand 40<Mj<65, 135<Mj<150
+
+
+
 ### Luca CutString=
 #cuts_itemize=["1==1 && njets>2 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"];
-
+### pag 134 tesi dottorato Luca
 
 ###### Cut String for B-TAGGING nella regione di segnale VBF
 ###per eliminare eventi con jet b-taggati
@@ -116,11 +122,11 @@ lumi_str=str("%.0f"%lumi);
 
 
 #eliminare eventi con B-TAGGING
-cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 &&  jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"];
+#cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.0001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 &&  ((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.45 && njets>1 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"];
 
 
 #TTbar ControlRegion
-#cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_pt>200 && pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 &&  jet_mass_pr > 65 && jet_mass_pr < 105 && jet_tau2tau1 < 0.45 && nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"];
+#cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.0001 && v_pt>200 && pfMET>25 && l_pt>80 && ungroomed_jet_pt>200 &&  ((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 105 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.6 && njets>1 && nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"];
 
 
 #cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","pfMET>40","l_pt>40","ungroomed_jet_pt>200","nBTagJet_medium <1","jet_tau2tau1 < 0.45","jet_mass_pr > 65 && jet_mass_pr < 105 ","abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001"];
@@ -129,6 +135,49 @@ cuts_itemize=["issignal==1 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001 && v_
 #cuts_itemize=["issignal==1 && v_pt>200","pfMET>40 && l_pt>40 && ungroomed_jet_pt>200 && nBTagJet_medium <1 && jet_mass_pr > 65 && jet_mass_pr < 105 && abs(vbf_maxpt_j1_eta-vbf_maxpt_j2_eta)>0.001","jet_tau2tau1 < 0.45"];
 
 
+
+### ELECTRON TYPE
+'''
+cuts_itemize=["1==1",    								# no Cuts
+              #
+              #ANGULAR CUTS
+              "deltaR_lak8jet>(TMath::Pi()/2.0)",		# 1) Angular Cuts to ensure BackToBack Topology
+              "TMath::Abs(deltaphi_METak8jet)>2.0",		# 2) Angular Cuts to ensure BackToBack Topology
+              "TMath::Abs(deltaphi_Vak8jet)>2.0",   	# 3) Angular Cuts to ensure BackToBack Topology 
+              #
+              # BOSON SELECTIONS
+              "v_pt>200",								# Pt of Vector Boson (leptonic)
+              "ungroomed_jet_pt>200", 					# Boson Selections
+              "((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150))", # SideBand selection
+              "jet_tau2tau1 < 0.6",						# N-Subjettines
+              #
+              #
+              "l_pt>45",								# Lepton Pt selection
+              #
+              # 
+              "pfMET>80",								# Particle Flow MET
+              #
+              # VBF SELECTIONS
+              "njets>1",								# VBF Topology: we request at least two jets
+              #
+              #
+              "abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"		# In order to regularize the first bin
+              #
+              # BTAGGING CONDITIONS
+              #"nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89" #NoBTagging
+              "nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"] #TTBar Control Region (sample entriched in TTBar)
+
+'''
+#TTBar Control Region (sample entriched in TTBar)
+#frameSubTitle_AD_string="\hspace{6pt} TTBarCR";
+#cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 &&((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.6 && l_pt>45 && pfMET>80 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"]; 
+
+
+
+
+# NoBTagging
+frameSubTitle_AD_string="\hspace{6pt} NoBTagging";
+cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 &&((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.6 && l_pt>45 && pfMET>80 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"];
 ###########################################################################################
 ######## FUNCTION DEFINITION
 ###########################################################################################
@@ -292,7 +341,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     Summary_Output_File_ll.write("\nNormal_Sample: %s \tReducedName: %s \tMass: %.0f \txSec: %f \tNumbEntBefore: %.0f \tScaleFactor: %.0f\n"%(total_sample_value[0][Sample_Number_ll][0],total_sample_value[0][Sample_Number_ll][1],total_sample_value[0][Sample_Number_ll][2],total_sample_value[0][Sample_Number_ll][3],total_sample_value[0][Sample_Number_ll][4],total_sample_value[0][Sample_Number_ll][5]));
     
     path_dir_in_tmp=Input_Cfg_File_ll[1];
-    path_dir_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_mu_plot"; 
+    path_dir_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_%s_plot"%Channel_global; 
     #path_dir_in="output/run2/MCDATAComparisonPlot_mu_22sep_%s/Run2_MCDataComparisonRSGraviton2000_mu_plot"%process_name;
     path_dir_out=Directory_Path_ll;
     pdl4 = subprocess.Popen(['cp','-r',path_dir_in,path_dir_out])
@@ -304,7 +353,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     Summary_Output_File_ll.write("\n\nCopy DATA from: %s"%path_dir_in);
     Summary_Output_File_ll.write("\nCopy DATA to: %s"%path_dir_out);
 
-    data_in=Directory_Path_ll+"/Run2_MCDataComparisonRSGraviton2000_mu_plot/";
+    data_in=Directory_Path_ll+"/Run2_MCDataComparisonRSGraviton2000_%s_plot/"%Channel_global;
     data_out=Directory_Path_ll+"/data/";
     pdl5 = subprocess.Popen(['mv',data_in,data_out])
     pdl5.wait()
@@ -315,7 +364,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     Summary_Output_File_ll.write("\nMove DATA from: %s"%data_in);
     Summary_Output_File_ll.write("\nMove DATA to: %s\n\n"%data_out);
 
-    root_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_mu.root"
+    root_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_%s.root"%Channel_global;
     root_out=data_out+"/Root_ControlPlots_out_%s.root"%process_name;
     pdl6 = subprocess.Popen(['cp',root_in,root_out])
     pdl6.wait()
@@ -556,7 +605,8 @@ def replace_latex(in_string):
     out2=out1.replace("_", "\_");
     out3=out2.replace(">", "\\texttt{>}");
     out4=out3.replace("<", "\\texttt{<}");
-    return out4
+    out5=out4.replace("||", "$||$")
+    return out5
 
 
     
@@ -574,9 +624,9 @@ def latex_graph_include(Sample_gi,Mass_gi,ScaleFactor_gi,ofile_gi,FrameSubTitle_
     ofile_gi.write("\\begin{figure}[h]\n");
     ofile_gi.write("\\begin{center}\n");
     ofile_gi.write("\subfloat[][\emph{$\Delta\eta_{jj}$}]\n");
-    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0.pdf}} \quad\n"%(SampleMass_gi));
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_%s_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0.pdf}} \quad\n"%(SampleMass_gi,Channel_global));
     ofile_gi.write("\subfloat[][\emph{$\Delta\eta_{jj}$ Log Scale}]\n");
-    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0_Log.pdf}}\n"%SampleMass_gi);
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_%s_plot/abs_vbf_maxpt_j1_eta-vbf_maxpt_j2_eta__0_Log.pdf}}\n"%(SampleMass_gi,Channel_global));
     #ofile_gi.write("\%\caption{$\mu$-channel: Input Variables for Cut Optimization.}\n");
     ofile_gi.write("\label{}\n");
     ofile_gi.write("\end{center}\n");
@@ -587,9 +637,9 @@ def latex_graph_include(Sample_gi,Mass_gi,ScaleFactor_gi,ofile_gi,FrameSubTitle_
     ofile_gi.write("\\begin{figure}[h]\n");
     ofile_gi.write("\\begin{center}\n");
     ofile_gi.write("\subfloat[][\emph{$M_{jj}$}]\n");
-    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/vbf_maxpt_jj_m_0.pdf}} \quad\n"%SampleMass_gi);
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_%s_plot/vbf_maxpt_jj_m_0.pdf}} \quad\n"%(SampleMass_gi,Channel_global));
     ofile_gi.write("\subfloat[][\emph{$M_{jj}$ Log Scale}]\n");
-    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_mu_plot/vbf_maxpt_jj_m_0_Log.pdf}}\n"%SampleMass_gi);
+    ofile_gi.write("{\includegraphics[width=.45\columnwidth]{%s/data/Run2_MCDataComparisonRSGraviton2000_%s_plot/vbf_maxpt_jj_m_0_Log.pdf}}\n"%(SampleMass_gi,Channel_global));
     #ofile_gi.write("\%\caption{$\mu$-channel: Input Variables for Cut Optimization.}\n"%SampleMass_gi);
     ofile_gi.write("\label{}\n");
     ofile_gi.write("\end{center}\n");
@@ -621,7 +671,9 @@ if __name__ == '__main__':
     print "\n\n\nWelcome! \nControl Plots Maker!\n"
     print "\nNtuple:\t%s\n"%options.ntuple
     print "Luminosity:\t%f"%Lumi_mm
-
+    
+    
+   
     
     
     
@@ -673,14 +725,20 @@ if __name__ == '__main__':
   
     
        
-    ControlP_Dir=Lumi_Dir_mm+"/ControlPlots";
-    if not os.path.isdir(ControlP_Dir):
-           pd4 = subprocess.Popen(['mkdir',ControlP_Dir]);
-           pd4.wait();   
+    ControlP_Dir_1=Lumi_Dir_mm+"/ControlPlots";
+    if not os.path.isdir(ControlP_Dir_1):
+           pd4 = subprocess.Popen(['mkdir',ControlP_Dir_1]);
+           pd4.wait();  
+    
+    
+    ControlP_Dir_2=ControlP_Dir_1+"/%s_Channel"%Channel_global;
+    if not os.path.isdir(ControlP_Dir_2):
+           pd4b = subprocess.Popen(['mkdir',ControlP_Dir_2]);
+           pd4b.wait(); 
     
     
     
-    Scale_W_Factor_Dir_mm=ControlP_Dir+"/ScaleW%s"%Scale_W_Factor_global_str;
+    Scale_W_Factor_Dir_mm=ControlP_Dir_2+"/ScaleW%s"%Scale_W_Factor_global_str;
     
 
     if os.path.isdir(Scale_W_Factor_Dir_mm):
@@ -892,7 +950,7 @@ if __name__ == '__main__':
     # Make InputFile and SampleListFile
     Ntuple_mm=options.ntuple;       
     Sample_Counter=0;
-    Channel_mm=options.channel;
+    
             
     for line in sampleValue:
         Sample_Counter=Sample_Counter+1;
@@ -1019,14 +1077,14 @@ if __name__ == '__main__':
         print "\n\nMade SampleList File:\t%s\n"%FileName_Sample_mm
         Output_Summary_File_mm.write("\n\nMade SampleList File:\t%s\n"%FileName_Sample_mm);
        
-        if Channel_mm=="mu":
+        if Channel_global=="mu":
            leptonT="muon";
         
-        elif Channel_mm=="el":
+        elif Channel_global=="el":
            leptonT="electron";   
         
         else:
-           leptonT="emu";
+           leptonT="em";
     
         
         if options.nodata:
@@ -1044,12 +1102,12 @@ if __name__ == '__main__':
             Cuts_FileName_mm=Cuts_filename_table[CutType_mm][Cut_Number_mm];
             Cut_Type_String_mm=str("%.0f"%(CutType_mm+1));
             Cut_Number_String_mm=str("%.0f"%(Cut_Number_mm+1));
-            Dir_Data_Saved_mm="output/run2/MCDATAComparisonPlot_%s_%s_%s%s_%s_%s/"%(Channel_mm,Ntuple_mm,Sample_mm,Mass_mm,Cut_Type_String_mm,Cut_Number_String_mm);
+            Dir_Data_Saved_mm="output/run2/MCDATAComparisonPlot_%s_%s_%s%s_%s_%s"%(Channel_global,Ntuple_mm,Sample_mm,Mass_mm,Cut_Type_String_mm,Cut_Number_String_mm);
        
             Cfg_Input_FileName_mm="cfg/DataMCComparison_InputCfgFile/MATTEO_DataMCComparison_InputCfgFile_%s%s_%s_%s.cfg"%(Sample_mm,Mass_str_mm,Cut_Type_String_mm,Cut_Number_String_mm)
             Output_SampleFile_mm_sample=open(Cfg_Input_FileName_mm,'w+');
             Output_SampleFile_mm_sample.write("[Input]\n\n");
-            Output_SampleFile_mm_sample.write(("InputDirectory = /afs/cern.ch/user/l/lbrianza/work/public/%s/WWTree_%s/\n")%(Ntuple_mm,Channel_mm));
+            Output_SampleFile_mm_sample.write(("InputDirectory = /afs/cern.ch/user/l/lbrianza/work/public/%s/WWTree_%s\n")%(Ntuple_mm,Channel_global));
             Output_SampleFile_mm_sample.write("TreeName = otree\n");
             Output_SampleFile_mm_sample.write(("LeptonType = %s\n")%leptonT);
             Output_SampleFile_mm_sample.write(("InputSampleList = %s\n")%(FileName_Sample_mm));
@@ -1072,14 +1130,14 @@ if __name__ == '__main__':
             Output_SampleFile_mm_sample.write("NormalizeBackgroundToData = false\n\n\n");
             Output_SampleFile_mm_sample.write("[Output]\n\n");
             Output_SampleFile_mm_sample.write(("OutputRootDirectory = %s\n"%(Dir_Data_Saved_mm)));
-            Output_SampleFile_mm_sample.write("OutputRootFile = Run2_MCDataComparisonRSGraviton2000_mu.root\n");
+            Output_SampleFile_mm_sample.write("OutputRootFile = Run2_MCDataComparisonRSGraviton2000_%s.root\n"%Channel_global);
             Output_SampleFile_mm_sample.write("\n");
             Output_SampleFile_mm_sample.close();
             
             print "\n\nMade CFG File:\t%s\n"%Cfg_Input_FileName_mm
             Output_Summary_File_mm.write("\n\nMade CFG File:\t%s\n"%Cfg_Input_FileName_mm);
             Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Counter_mm]=Cfg_Input_FileName_mm;
-            Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Total_Number_mm+Sample_Counter_mm]=Dir_Data_Saved_mm;
+            Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Total_Number_mm+Sample_Counter_mm]=Dir_Data_Saved_mm+"/";
     
     
     print "\n\n----------- Check CFG name ----------------\n"
@@ -1256,7 +1314,16 @@ if __name__ == '__main__':
     Ntuple_Name_texttt="\\texttt{"+tmp_ntuple_texttt+"}";
     
     
-    latex_FrameSubtitle="\\framesubtitle{$\mu$-channel \hspace{6pt} Ntuple: "+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %s}\n"%Scale_W_Factor_global_str;
+    if Channel_global=="mu":
+       channel_latex_mm="$\mu$";
+    
+    elif Channel_global=="em":
+       channel_latex_mm="e$\mu$";
+    
+    else:
+       channel_latex_mm="e" 
+    Frame_tmp="\\framesubtitle{%s-channel \hspace{6pt} Ntuple: "%(channel_latex_mm)+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %s"%(Scale_W_Factor_global_str);
+    latex_FrameSubtitle=Frame_tmp+frameSubTitle_AD_string+"\hspace{6pt} SideBand: $40<M_{jj}<65$ or $135<M_{jj}<150$ (GeV)}\n";
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Settings }\n");   
     Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
@@ -1264,6 +1331,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\\begin{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\item Luminosit\`a:%.0f ${fb}^{-1}$\n"%Lumi_mm);
     Output_Beamer_Latex_File_mm.write("\item Ntuple: %s\n"%Ntuple_Name_texttt);
+    Output_Beamer_Latex_File_mm.write("\item Channel: %s\n"%channel_latex_mm);
     Output_Beamer_Latex_File_mm.write("\item W+Jets Scale Factor: %s\n"%Scale_W_Factor_global_str);
     Output_Beamer_Latex_File_mm.write("\end{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\end{frame}\n");
