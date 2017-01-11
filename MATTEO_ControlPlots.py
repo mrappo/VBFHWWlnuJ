@@ -138,52 +138,279 @@ Channel_global=options.channel;
 
 ### ELECTRON TYPE
 '''
-cuts_itemize=["1==1",    								# no Cuts
-              #
-              #ANGULAR CUTS
-              "deltaR_lak8jet>(TMath::Pi()/2.0)",		# 1) Angular Cuts to ensure BackToBack Topology
-              "TMath::Abs(deltaphi_METak8jet)>2.0",		# 2) Angular Cuts to ensure BackToBack Topology
-              "TMath::Abs(deltaphi_Vak8jet)>2.0",   	# 3) Angular Cuts to ensure BackToBack Topology 
-              #
-              # BOSON SELECTIONS
+Cuts For Significance Optimization:
+
+     ## NO CUTS
+        "1==1",    							
+     
+     
+     
+     ## BASIC SELECTIONS CUTS
+     
+          # ANGULAR CUTS to ensure BackToBack Topology
+              "deltaR_lak8jet>(TMath::Pi()/2.0)",
+              "TMath::Abs(deltaphi_METak8jet)>2.0",		
+              "TMath::Abs(deltaphi_Vak8jet)>2.0",    
+              
+          # BOSON SELECTIONS
               "v_pt>200",								# Pt of Vector Boson (leptonic)
               "ungroomed_jet_pt>200", 					# Boson Selections
-              "((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150))", # SideBand selection
-              "jet_tau2tau1 < 0.6",						# N-Subjettines
+                        
+          # LEPTON SELECTION
+              ELECTRON: "l_pt>45",								# Lepton Pt selection
+              MUON: "l_pt>40",
+          
+          # MET SELECTION 
+              ELECTRON: "pfMET>80",								# Particle Flow MET
+              MUON: "pfMET>40",
+     
+
+
+
+
+     ## BTAGGING CONDITIONS
+          
+          # NO B-TAGGING
+              "nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"
+
+          # B-TAGGING -> TTBar ControlRegion
+              "nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"
+
+
+
+
+     # W-TAGGER -> N-Subjettines
+        "jet_tau2tau1 < 0.6",
+     
+     
+     ## VBF SELECTIONS
+          "njets>1",								# VBF Topology: we request at least two jets
+          "abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"		# In order to regularize the first bin
               #
-              #
-              "l_pt>45",								# Lepton Pt selection
-              #
-              # 
-              "pfMET>80",								# Particle Flow MET
-              #
-              # VBF SELECTIONS
-              "njets>1",								# VBF Topology: we request at least two jets
-              #
-              #
-              "abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001"		# In order to regularize the first bin
-              #
-              # BTAGGING CONDITIONS
-              #"nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89" #NoBTagging
-              "nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"] #TTBar Control Region (sample entriched in TTBar)
+     
+     
+     
+     
+     ## Mj SELECTIONS
+          
+          # SIGNAL REGION
+              "(jet_mass_pr > 65 && jet_mass_pr < 105 )",
+                   
+          # SideBand
+              "((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150))",
+     
+     
+	
+     
+     
+
 
 '''
-#TTBar Control Region (sample entriched in TTBar)
-#frameSubTitle_AD_string="\hspace{6pt} TTBarCR";
-#cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 &&((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.6 && l_pt>45 && pfMET>80 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89"]; 
+
+####################################
+### EM SAMPLE and e-only sample
+####################################
+if (options.channel=="el" or options.channel=="em"):
+  
+    #frameSubTitle_AD_string="\hspace{6pt} TTBarCR";
+    frameSubTitle_AD_string="";
+    #cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","ungroomed_jet_pt>200","l_pt>45","pfMET>80","nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89","jet_tau2tau1 < 0.6","njets>1","abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001","(jet_mass_pr > 65 && jet_mass_pr < 105 )"]; 
+    cuts_itemize=["1==1 && deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 && l_pt>45 && pfMET>80 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89 && jet_tau2tau1 < 0.6 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && (jet_mass_pr > 65 && jet_mass_pr < 105 )"]; 
+
+    #TTBarFileCuts
+    TTBar_Cuts="deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 && l_pt>45 && pfMET>80 && (nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89) && jet_tau2tau1 < 0.6 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && ((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150))"; 
 
 
 
 
-# NoBTagging
-frameSubTitle_AD_string="\hspace{6pt} NoBTagging";
-cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 &&((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150)) && jet_tau2tau1 < 0.6 && l_pt>45 && pfMET>80 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89"];
+
+##############
+### MU SAMPLE
+##############
+else:
+ 
+    #frameSubTitle_AD_string="\hspace{6pt} TTBarCR";
+    frameSubTitle_AD_string="";
+    #cuts_itemize=["1==1","deltaR_lak8jet>(TMath::Pi()/2.0)","TMath::Abs(deltaphi_METak8jet)>2.0","TMath::Abs(deltaphi_Vak8jet)>2.0","v_pt>200","ungroomed_jet_pt>200","l_pt>40","pfMET>40","nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89","jet_tau2tau1 < 0.6","njets>1","abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001","(jet_mass_pr > 65 && jet_mass_pr < 105 )"]; 
+    cuts_itemize=["1==1 && deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 && l_pt>40 && pfMET>40 && nBTagJet_medium==0 && vbf_maxpt_j1_bDiscriminatorCSV<0.89 && vbf_maxpt_j2_bDiscriminatorCSV<0.89 && jet_tau2tau1 < 0.6 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && (jet_mass_pr > 65 && jet_mass_pr < 105 )"];
+    
+    #TTBarFileCuts
+    TTBar_Cuts="deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet)>2.0 && TMath::Abs(deltaphi_Vak8jet)>2.0 && v_pt>200 && ungroomed_jet_pt>200 && l_pt>40 && pfMET>40 && (nBTagJet_medium >0 || vbf_maxpt_j1_bDiscriminatorCSV>0.89 || vbf_maxpt_j2_bDiscriminatorCSV>0.89) && jet_tau2tau1 < 0.6 && njets>1 && abs(vbf_maxpt_j1_pt-vbf_maxpt_j2_pt)>0.0001 && ((jet_mass_pr > 40 && jet_mass_pr < 65 )  || ( jet_mass_pr > 135 && jet_mass_pr < 150))"; 
+
+
+
+
+
+
 ###########################################################################################
 ######## FUNCTION DEFINITION
 ###########################################################################################
 
 
 
+
+
+
+
+
+
+def made_TTBar_Scale_Factor(in_dir_TTBar,input_Cfg_File_TTBar, out_SumFile_TTB):
+    
+    
+    log_file_TTBar=in_dir_TTBar+"/Log_TTBar.txt";
+    log_file_TTBar_Error=in_dir_TTBar+"/Log_TTBar_Error.txt";
+          
+    output_log_TTBar=open(log_file_TTBar,'w+');
+    output_log_TTBar_Error=open(log_file_TTBar_Error,'w+');
+
+    
+    
+    
+    Wjets_Pythia_Events_ttb="Jets Pythia  Events:           "; # 0
+    Wjets_Herwig_Events_ttb="Jets Herwig  Events:           "; # 1
+    TTbar_Powegh_Events_ttb="Tbar Powegh Events:           "; # 2
+    TTbar_MC_Events_ttb="Tbar mc@nlo Events:           "; # 3
+    VV_QCD_Events_ttb="V Events QCD:              "; # 4
+    WW_EWK_Events_ttb="W Events EWK:              "; # 5
+    STop_Events_ttb="Top Events:            "; # 6
+    All_bkg_Pythia_ttb="l Backgrounds Events Pythia: "; # 7
+    All_bkg_Herwig_ttb="l Backgrounds Events Herwig: "; # 8
+    Signal_gg_ttb="ignal ggH:             "; # 9
+    Signal_VBF_ttb="ignal qqH:             "; # 10
+
+    
+    Events_type_ttb=[Wjets_Pythia_Events_ttb,Wjets_Herwig_Events_ttb,TTbar_Powegh_Events_ttb,TTbar_MC_Events_ttb,VV_QCD_Events_ttb,WW_EWK_Events_ttb,STop_Events_ttb,All_bkg_Pythia_ttb,All_bkg_Herwig_ttb,Signal_gg_ttb,Signal_VBF_ttb];
+    
+    TTB_MC_Values=[0 for i in range(number_Events_type)]
+    
+    
+    
+    
+    
+    pTTB1 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',input_Cfg_File_TTBar,Scale_W_Factor_global_str],stdout=subprocess.PIPE,stderr=output_log_TTBar_Error);    
+    
+    ev_ttb=0;
+    ev_counter=0;
+    TTB_check1=0;
+    TTB_check2=0;
+    TTB_check3=0;
+    for line in pTTB1.stdout:
+        #sys.stdout.write(line)
+        output_log_TTBar.write(line)
+    
+        if line.find('WWTree_data_golden_2p1.root') !=-1:
+           TTB_check1=TTB_check1+1;
+           
+           
+           
+        if TTB_check2:
+           cut_string1=line.split("ata Entries ");
+           t1=cut_string1[1];
+           cut_string2=t1.split(" weigthed events ");
+           t2=cut_string2[0];
+           TTB_data=float(t2);
+           
+           out_SumFile_TTB.write("\n");   
+           out_SumFile_TTB.write(line);
+           out_SumFile_TTB.write("\n DATA Number of Events: %f\n"%TTB_data);
+           out_SumFile_TTB.write("\n--------------------------------------------------\n\n\n");
+           
+           print line
+           print "\n DATA Number of Events: %f"%TTB_data
+           print "\n--------------------------------------------------\n\n"
+           TTB_check2=0;
+              
+        if TTB_check1==1: 
+           
+           out_SumFile_TTB.write("\n\n-------------- Read TTBar DATA: -----------------\n");
+           out_SumFile_TTB.write(line);  
+
+           
+           print "\n\n-------------- Read TTBar DATA: -----------------\n"
+           print line  
+           TTB_check1=TTB_check1+1;
+           TTB_check2=1;
+              
+        if line.find("Event Scaled To Lumi") !=-1:
+           TTB_check3=1;
+        if TTB_check3:
+           print line
+           out_SumFile_TTB.write("\n"+line);
+
+        for ev_ttb in Events_type_ttb:
+            if line.find(ev_ttb) !=-1:
+               cut_string4 = line.split(ev_ttb);
+               new_string = cut_string4[1]
+               #print line
+               #out_SumFile_TTB.write("\n"+line);
+               val=float(new_string);
+               TTB_MC_Values[ev_counter]=val;
+               ev_counter=ev_counter+1;
+        
+    pTTB1.wait();    
+    
+    
+    WJets_ttb=TTB_MC_Values[0];
+    VV_ttb=TTB_MC_Values[4]+TTB_MC_Values[5];
+    STop_ttb=TTB_MC_Values[6];
+    TTB_ttb=TTB_MC_Values[2]+TTB_MC_Values[3];
+    TTB_NumberMC_ttb=TTB_ttb+STop_ttb;
+    DATA_ttb=TTB_data-WJets_ttb-VV_ttb;
+
+    TTBar_Scale_Factor=DATA_ttb/TTB_NumberMC_ttb;
+    
+    
+
+    
+    
+    out_SumFile_TTB.write("\n\n-------------- TTBar ScaleFactor Evaluation -----------------\n");       
+    out_SumFile_TTB.write("Wjets_Pythia MC Events: %f"%TTB_MC_Values[0]); # 0
+    out_SumFile_TTB.write("\nWjets_Herwig MC Events: %f"%TTB_MC_Values[1]);# 1
+    out_SumFile_TTB.write("\nTTbar_Powegh MC Events: %f"%TTB_MC_Values[2]); # 2
+    out_SumFile_TTB.write("\nTTbar_MC MC Events: %f"%TTB_MC_Values[3]); # 3
+    out_SumFile_TTB.write("\nVV_QCD MC Events: %f"%TTB_MC_Values[4]); # 4
+    out_SumFile_TTB.write("\nWW_EWK MC Events: %f"%TTB_MC_Values[5]); # 5
+    out_SumFile_TTB.write("\nSTop MC Events: %f"%TTB_MC_Values[6]); # 6
+    out_SumFile_TTB.write("\nAll_bkg_Pythia MC Events: %f"%TTB_MC_Values[7]); # 7
+    out_SumFile_TTB.write("\nAll_bkg_Herwig MC Events: %f"%TTB_MC_Values[8]); # 8
+    out_SumFile_TTB.write("\nSignal_gg MC Events: %f"%TTB_MC_Values[9]); # 9
+    out_SumFile_TTB.write("\nSignal_VBF MC Events: %f"%TTB_MC_Values[10]); # 10
+    out_SumFile_TTB.write("\nData: %f"%TTB_data);
+    out_SumFile_TTB.write("\nN_d=Data-WJ-VV: %f"%DATA_ttb);
+    out_SumFile_TTB.write("\nN_t=TTBar+Stop: %f"%TTB_NumberMC_ttb);
+    out_SumFile_TTB.write("\nTTB ScaleFactor=N_d/N_t: %f"%TTBar_Scale_Factor);
+    out_SumFile_TTB.write("\n--------------------------------------------------\n\n");
+    
+    
+    
+    
+    
+    
+    print "\n\n-------------- TTBar ScaleFactor Evaluation -----------------\n"        
+    print "Wjets_Pythia MC Events: %f"%TTB_MC_Values[0] # 0
+    print "Wjets_Herwig MC Events: %f"%TTB_MC_Values[1]# 1
+    print "TTbar_Powegh MC Events: %f"%TTB_MC_Values[2] # 2
+    print "TTbar_MC MC Events: %f"%TTB_MC_Values[3] # 3
+    print "VV_QCD MC Events: %f"%TTB_MC_Values[4] # 4
+    print "WW_EWK MC Events: %f"%TTB_MC_Values[5] # 5
+    print "STop MC Events: %f"%TTB_MC_Values[6] # 6
+    print "All_bkg_Pythia MC Events: %f"%TTB_MC_Values[7] # 7
+    print "All_bkg_Herwig MC Events: %f"%TTB_MC_Values[8] # 8
+    print "Signal_gg MC Events: %f"%TTB_MC_Values[9] # 9
+    print "Signal_VBF MC Events: %f"%TTB_MC_Values[10] # 10
+    print "\nData: %f"%TTB_data
+    print "\nN_d=Data-WJ-VV: %f"%DATA_ttb
+    print "\nN_t=TTBar+Stop: %f"%TTB_NumberMC_ttb
+    print "\nTTB ScaleFactor=N_d/N_t: %f"%TTBar_Scale_Factor
+    print "\n--------------------------------------------------\n\n"
+    
+    output_log_TTBar.close();
+    output_log_TTBar_Error.close();
+    
+    return TTBar_Scale_Factor;
+
+
+
     
     
     
@@ -191,8 +418,9 @@ cuts_itemize=["deltaR_lak8jet>(TMath::Pi()/2.0) && TMath::Abs(deltaphi_METak8jet
 
 
 
-def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Significance_Table_ll,Input_Cfg_File_ll,Latex_File_ll,Summary_Output_File_ll,Directory_Path_ll):
+def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Significance_Table_ll,Input_Cfg_File_ll,Latex_File_ll,Summary_Output_File_ll,Directory_Path_ll,TTB_ScaleFactor_ll):
     
+    TTB_ScaleFactor_ll_str=str(TTB_ScaleFactor_ll);
     Cut_Type_ll=C_Type_ll-1;
     Sample_ll=sampleValue[Sample_Number_ll][0];
     Mass_ll=sampleValue[Sample_Number_ll][2];        
@@ -273,7 +501,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     
     
     Scale_ww_ll=Scale_W_Factor_global_str;
-    pdl3 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',Input_Cfg_File_ll[0],Scale_ww_ll],stdout=subprocess.PIPE,stderr=output_log2)
+    pdl3 = subprocess.Popen(['./bin/DataMCComparisonPlot.exe',Input_Cfg_File_ll[0],Scale_ww_ll,"1",TTB_ScaleFactor_ll_str],stdout=subprocess.PIPE,stderr=output_log2)
     #pdl3.wait()
     start=0;
     for line in pdl3.stdout:
@@ -282,7 +510,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
         if line.find('Event Scaled To Lumi') !=-1:
            start=1;
         if start:   
-           Summary_Output_File_ll.write(line);
+           Summary_Output_File_ll.write("\n"+line);
         counter_events_type=0;
         for ev in Events_type:
             if line.find(ev) !=-1:
@@ -361,7 +589,7 @@ def run_log(Sample_Number_ll,Cut_Number_ll,C_Type_ll,Cut_Total_Number_ll,Signifi
     print "\nMove DATA to: %s\n\n"%data_out
     
     
-    Summary_Output_File_ll.write("\nMove DATA from: %s"%data_in);
+    Summary_Output_File_ll.write("\n\nMove DATA from: %s"%data_in);
     Summary_Output_File_ll.write("\nMove DATA to: %s\n\n"%data_out);
 
     root_in=path_dir_in_tmp+"Run2_MCDataComparisonRSGraviton2000_%s.root"%Channel_global;
@@ -1081,7 +1309,7 @@ if __name__ == '__main__':
            leptonT="muon";
         
         elif Channel_global=="el":
-           leptonT="electron";   
+           leptonT="el";   
         
         else:
            leptonT="em";
@@ -1140,6 +1368,56 @@ if __name__ == '__main__':
             Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Total_Number_mm+Sample_Counter_mm]=Dir_Data_Saved_mm+"/";
     
     
+        if not Sample_Counter_mm:
+               
+               Cfg_CUTS_FileName_TTBar="cfg/DataMCComparison_InputCfgFile/MATTEO_CutsFile_TTBar.txt"
+               Output_TTBar_Cuts_File=open(Cfg_CUTS_FileName_TTBar,'w+');
+               Output_TTBar_Cuts_File.write(TTBar_Cuts);
+               Output_TTBar_Cuts_File.close();
+               
+               
+               Cfg_Input_FileName_TTBar="cfg/DataMCComparison_InputCfgFile/MATTEO_DataMCComparison_InputCfgFile_TTBar.cfg"
+               Output_TTBar_Cfg_File=open(Cfg_Input_FileName_TTBar,'w+');
+               Output_TTBar_Cfg_File.write("[Input]\n\n");
+               Output_TTBar_Cfg_File.write(("InputDirectory = /afs/cern.ch/user/l/lbrianza/work/public/%s/WWTree_%s\n")%(Ntuple_mm,Channel_global));
+               Output_TTBar_Cfg_File.write("TreeName = otree\n");
+               Output_TTBar_Cfg_File.write(("LeptonType = %s\n")%leptonT);
+               Output_TTBar_Cfg_File.write(("InputSampleList = %s\n")%(FileName_Sample_mm));
+               Output_TTBar_Cfg_File.write("InputVariableList = %s\n"%FileName_VariableList_mm);
+               Output_TTBar_Cfg_File.write(("InputCutList = %s\n")%Cfg_CUTS_FileName_TTBar);
+               Output_TTBar_Cfg_File.write(("SignalqqHName = %s\n")%ReducedName_VBF_mm);
+               Output_TTBar_Cfg_File.write(("SignalggHName = %s\n")%ReducedName_mm);
+               Output_TTBar_Cfg_File.write(("SignalGraviton = grav\n"));
+               Output_TTBar_Cfg_File.write(("WithoutData = %s\n\n\n")%withData);    
+               Output_TTBar_Cfg_File.write("[Option]\n\n");    
+               Output_TTBar_Cfg_File.write("BackgroundWeight = genWeight*eff_and_pu_Weight\n");
+               Output_TTBar_Cfg_File.write("BackgroundWeightMCatNLO = 1\n");
+               Output_TTBar_Cfg_File.write("SignalggHWeight = 1\n");
+               Output_TTBar_Cfg_File.write("SignalqqHWeight = 1\n");
+               #Output_TTBar_Cfg_File.write("SignalGravitonWeight = genWeight\n");
+               Output_TTBar_Cfg_File.write(("Lumi = %f\n")%Lumi_mm);
+               Output_TTBar_Cfg_File.write("ttbarControlplots = false\n");
+               Output_TTBar_Cfg_File.write("SignalScaleFactor = %f\n"%(ScaleFactor_mm));
+               Output_TTBar_Cfg_File.write("NormalizeSignalToData = false\n");
+               Output_TTBar_Cfg_File.write("NormalizeBackgroundToData = false\n\n\n");
+               Output_TTBar_Cfg_File.write("[Output]\n\n");
+               Output_TTBar_Cfg_File.write(("OutputRootDirectory = %s\n"%(Dir_Data_Saved_mm)));
+               Output_TTBar_Cfg_File.write("OutputRootFile = Run2_MCDataComparisonRSGraviton2000_%s.root\n"%Channel_global);
+               Output_TTBar_Cfg_File.write("\n");
+               Output_TTBar_Cfg_File.close();
+               
+               
+               
+               
+               
+               '''
+            print "\n\nMade CFG File:\t%s\n"%Cfg_Input_FileName_mm
+            Output_Summary_File_mm.write("\n\nMade CFG File:\t%s\n"%Cfg_Input_FileName_mm);
+            Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Counter_mm]=Cfg_Input_FileName_mm;
+            Cfg_FileName_Table_mm[CutType_mm][Cut_Number_mm][Sample_Total_Number_mm+Sample_Counter_mm]=Dir_Data_Saved_mm+"/";
+               '''
+    
+    
     print "\n\n----------- Check CFG name ----------------\n"
     i=j=k=0;
     for i in range(2):
@@ -1151,7 +1429,32 @@ if __name__ == '__main__':
     Significance_Table_mm=[[[[0 for z in range(number_Events_type+4) ]for k in range(Sample_Total_Number_mm)]for j in range(Cuts_Total_Number_mm)]for i in range(2)];
     
     
+
+
+
+
     
+    
+    
+    
+    
+    #########################################################
+    ###### EVALUATE TTBAR SCALE FACTOR
+    #########################################################
+
+    # def made_TTBar_Scale_Factor(in_dir_TTBar,input_Cfg_File_TTBar):
+    TTBar_Scale_Factor_mm=made_TTBar_Scale_Factor(Control_Plots_Dir_mm,Cfg_Input_FileName_TTBar,Output_Summary_File_mm);
+    TTBar_Scale_Factor_mm_str=str(TTBar_Scale_Factor_mm);
+
+
+
+
+
+
+
+
+
+
     #########################################################
     ######### MAKE CONTROL PLOTS
     #########################################################
@@ -1235,7 +1538,7 @@ if __name__ == '__main__':
             Output_Summary_Latex_File_mm.write("\nCONSECUTIVE CUT\n");
             cfg_file_1=[Cfg_FileName_Table_mm[0][Cut_Number_mm][n_sample],Cfg_FileName_Table_mm[0][Cut_Number_mm][Sample_Total_Number_mm+n_sample]];
             #def run_log(sampleNumber,cutNumber,ctype,total_cutNumber,Significance_Table_mm_log,input_cfg_file,latex_file,Output_Summary_File_mm,in_cc_dir):
-            Significance_Table_mm=run_log(n_sample,Cut_Number_mm,1,Cuts_Total_Number_mm,Significance_Table_mm,cfg_file_1,Output_Summary_Latex_File_mm,Output_Summary_File_mm,final_dir1)
+            Significance_Table_mm=run_log(n_sample,Cut_Number_mm,1,Cuts_Total_Number_mm,Significance_Table_mm,cfg_file_1,Output_Summary_Latex_File_mm,Output_Summary_File_mm,final_dir1,TTBar_Scale_Factor_mm)
             
             
             
@@ -1247,7 +1550,7 @@ if __name__ == '__main__':
             Output_Summary_Latex_File_mm.write("\nSINGLE CUT\n");
             cfg_file_2=[Cfg_FileName_Table_mm[1][Cut_Number_mm][n_sample],Cfg_FileName_Table_mm[1][Cut_Number_mm][Sample_Total_Number_mm+n_sample]];
             #def run_log(sampleNumber,cutNumber,ctype,total_cutNumber,Significance_Table_mm_log,input_cfg_file,latex_file,Output_Summary_File_mm,in_cc_dir):
-            Significance_Table_mm=run_log(n_sample,Cut_Number_mm,2,Cuts_Total_Number_mm,Significance_Table_mm,cfg_file_2,Output_Summary_Latex_File_mm,Output_Summary_File_mm,final_dir2)
+            Significance_Table_mm=run_log(n_sample,Cut_Number_mm,2,Cuts_Total_Number_mm,Significance_Table_mm,cfg_file_2,Output_Summary_Latex_File_mm,Output_Summary_File_mm,final_dir2,TTBar_Scale_Factor_mm)
             
             
     
@@ -1322,8 +1625,8 @@ if __name__ == '__main__':
     
     else:
        channel_latex_mm="e" 
-    Frame_tmp="\\framesubtitle{%s-channel \hspace{6pt} Ntuple: "%(channel_latex_mm)+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %s"%(Scale_W_Factor_global_str);
-    latex_FrameSubtitle=Frame_tmp+frameSubTitle_AD_string+"\hspace{6pt} SideBand: $40<M_{jj}<65$ or $135<M_{jj}<150$ (GeV)}\n";
+    Frame_tmp="\\framesubtitle{%s-channel \hspace{6pt} Ntuple: "%(channel_latex_mm)+Ntuple_Name_texttt+" \hspace{6pt} W+Jets ScaleFactor: %s"%(Scale_W_Factor_global_str)+" \hspace{6pt} TTBar ScaleFactor: %s"%(TTBar_Scale_Factor_mm_str);
+    latex_FrameSubtitle=Frame_tmp+frameSubTitle_AD_string+"\hspace{6pt} SignalRegion: $65<M_{jj}<105$ (GeV)}\n";
     Output_Beamer_Latex_File_mm.write("\\begin{frame}\n");
     Output_Beamer_Latex_File_mm.write("\\frametitle{Control Plots - Settings }\n");   
     Output_Beamer_Latex_File_mm.write(latex_FrameSubtitle);
@@ -1333,6 +1636,7 @@ if __name__ == '__main__':
     Output_Beamer_Latex_File_mm.write("\item Ntuple: %s\n"%Ntuple_Name_texttt);
     Output_Beamer_Latex_File_mm.write("\item Channel: %s\n"%channel_latex_mm);
     Output_Beamer_Latex_File_mm.write("\item W+Jets Scale Factor: %s\n"%Scale_W_Factor_global_str);
+    Output_Beamer_Latex_File_mm.write("\item TTBar Scale Factor: %s\n"%TTBar_Scale_Factor_mm_str);
     Output_Beamer_Latex_File_mm.write("\end{itemize}\n");
     Output_Beamer_Latex_File_mm.write("\end{frame}\n");
     Output_Beamer_Latex_File_mm.write("\n");
